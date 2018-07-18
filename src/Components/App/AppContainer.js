@@ -7,7 +7,10 @@ import typography from "../../typography";
 // 헤더 안으로 inject 스타일
 const baseStyles = () => injectGlobal`
     ${reset};
-    ${typography}
+    ${typography};
+    a{
+      text-decoration:none!important;
+    }
 `;
 
 class AppContainer extends Component {
