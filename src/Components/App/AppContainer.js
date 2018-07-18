@@ -6,7 +6,8 @@ import _ from "lodash";
 
 import AppPresenter from "./AppPresenter";
 import typography from "../../typography";
-import { API_URL } from "../../constants";
+import { API_URL, WS_URL } from "../../constants";
+import { parseMessage } from "../../utils";
 
 
 // 헤더 안으로 inject 스타일
@@ -20,11 +21,12 @@ const baseStyles = () => injectGlobal`
 
 class AppContainer extends Component {
   state = {
-    isLoading : true
+    isLoading: true
   };
 
   componentDidMount = () => {
     this._getData();
+    this._connectToWs();
   }
 
   render() {
@@ -43,6 +45,24 @@ class AppContainer extends Component {
       isLoading: false
     })
   }
+
+  _connectToWs = () => {
+    // chrome browser에 내장된 WebSocket API 사용
+    const ws = new WebSocket(WS_URL);
+    ws.addEventListener("message", message => {
+      const parsedMessage = parseMessage(message);
+      if (parsedMessage !== null && parsedMessage !== undefined) {
+        this.setState(prevState => {
+          return {
+            ...prevState,
+            blocks: [...parsedMessage, ...prevState.blocks],
+            transactions: [...parsedMessage[0].data, ...prevState.transactions]
+          }
+        })
+      }
+    });
+  }
+  
 }
 
 export default AppContainer;
